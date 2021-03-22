@@ -719,6 +719,8 @@ def testMSTApprox():
     Tpass = 0
     Mflag = False
     Tflag = False
+    flag_left = False
+    flag_right = False
     t = 9
     tol = 1e-6
 
