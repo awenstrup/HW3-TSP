@@ -10,6 +10,7 @@ Please don't look at it unless you are absolutely stuck, even after hours!
 
 # Import math.
 import math
+import itertools
 ################################################################################
 
 """
@@ -71,8 +72,7 @@ It should be an array of cities visited in the tour, in the order visited.
 The cities should be denoted by their rank (their numbering in adjList).
 """
 def tsp(adjList, start):
-    ##### Your implementation goes here. #####
-
+    """Not used. See Map.getTSPApprox()"""
     return tour
 
 ################################################################################
@@ -409,12 +409,42 @@ class Map:
     """
     def getTSPApprox(self):
         if len(self.mst) > 0:
-            ### TODO ###
-            # Complete the TSP Approximation method here
-            # Update the Map object with the TSP Approximate tour
+            # Generate the MST
+            self.getMST()
+
+            # Find the root of the MST
+            root = self.adjList[0]  # not the actual root
+            while root.prev is not None:
+                root = root.prev
+
+            # Perform the DFT
+            cycle = list()
+            self.dft(root, cycle)
+            cycle.append(root.rank)
+
+            # Get the length of the DFT (backtracking has already been cut out)
+            length = sum([
+                self.adjMat[cycle[i]][cycle[i+1]] 
+                for i in range(len(cycle) - 2)
+            ])
+            
+            self.tour = cycle
+
         else:
             raise Exception('No MST set!')
-        return
+        return length
+
+    def dft(self, node, l):
+        """Perform a depth-first traversal on a tree rooted a node,
+        appending elements to list l
+        """
+        l.append(node.rank) # the node is the starting point for the dft
+        for n in node.mstN:
+            if not (n is node.prev or n.rank in l):
+                self.dft(n, l)
+        # l.append(node)
+        # with this line commented out, we don't need to clean the dtf later
+
 
     """
     getTSPOptimal: brute-force approach to finding the optimal tour.
@@ -423,8 +453,16 @@ class Map:
         ### TODO ###
         # Complete a brute-force TSP solution!
         # Replace the following two lines with an actual implementation.
-        self.tourOpt = getMap(self.mapNum)[3]
-        return None
+        cycles = {}
+        for c in itertools.permutations(self.adjList):
+            cycle = [city.rank for city in c]
+            cycle.append(cycle[0]) # make it an actual cycle
+            length = sum([
+                self.adjMat[cycle[i]][cycle[i+1]] 
+                for i in range(len(cycle) - 2)
+            ])
+            cycles[tuple(cycle)] = length
+        self.tourOpt = min(cycles.keys(), key=(lambda k: cycles[k]))
 
     """
     clearMap: this function will reset the MST and tour for the map, along with
