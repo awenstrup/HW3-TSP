@@ -10,7 +10,6 @@ Please don't look at it unless you are absolutely stuck, even after hours!
 
 # Import math.
 import math
-import itertools
 ################################################################################
 
 """
@@ -72,7 +71,8 @@ It should be an array of cities visited in the tour, in the order visited.
 The cities should be denoted by their rank (their numbering in adjList).
 """
 def tsp(adjList, start):
-    """Not used. See Map.getTSPApprox()"""
+    ##### Your implementation goes here. #####
+
     return tour
 
 ################################################################################
@@ -409,42 +409,12 @@ class Map:
     """
     def getTSPApprox(self):
         if len(self.mst) > 0:
-            # Generate the MST
-            self.getMST()
-
-            # Find the root of the MST
-            root = self.adjList[0]  # not the actual root
-            while root.prev is not None:
-                root = root.prev
-
-            # Perform the DFT
-            cycle = list()
-            self.dft(root, cycle)
-            cycle.append(root.rank)
-
-            # Get the length of the DFT (backtracking has already been cut out)
-            length = sum([
-                self.adjMat[cycle[i]][cycle[i+1]] 
-                for i in range(len(cycle) - 2)
-            ])
-            
-            self.tour = cycle
-
+            ### TODO ###
+            # Complete the TSP Approximation method here
+            # Update the Map object with the TSP Approximate tour
         else:
             raise Exception('No MST set!')
-        return length
-
-    def dft(self, node, l):
-        """Perform a depth-first traversal on a tree rooted a node,
-        appending elements to list l
-        """
-        l.append(node.rank) # the node is the starting point for the dft
-        for n in node.mstN:
-            if not (n is node.prev or n.rank in l):
-                self.dft(n, l)
-        # l.append(node)
-        # with this line commented out, we don't need to clean the dtf later
-
+        return
 
     """
     getTSPOptimal: brute-force approach to finding the optimal tour.
@@ -453,16 +423,8 @@ class Map:
         ### TODO ###
         # Complete a brute-force TSP solution!
         # Replace the following two lines with an actual implementation.
-        cycles = {}
-        for c in itertools.permutations(self.adjList):
-            cycle = [city.rank for city in c]
-            cycle.append(cycle[0]) # make it an actual cycle
-            length = sum([
-                self.adjMat[cycle[i]][cycle[i+1]] 
-                for i in range(len(cycle) - 2)
-            ])
-            cycles[tuple(cycle)] = length
-        self.tourOpt = min(cycles.keys(), key=(lambda k: cycles[k]))
+        self.tourOpt = getMap(self.mapNum)[3]
+        return None
 
     """
     clearMap: this function will reset the MST and tour for the map, along with
@@ -775,20 +737,32 @@ def testMSTApprox():
                     Tflag = True
             if ind == 7:
                 ans = 40030.173592
+                ans2 = 78992.875888
                 if (w < ans - tol) or (w > ans + tol):
-                    print('Test %d: Wrong TSP!' % ind)
-                    # Begin debugging code
-                    print(w)
-                    # End debugging code
+                    print('Test %d: Wrong TSP (when traversing the tree via DFS from left to right)!' % ind)
+                    flag_left = True
+                if (w < ans2 - tol) or (w > ans2 + tol):
+                    print('Test %d: Wrong TSP (when traversing the tree via DFS from right to left)!' % ind)
+                    flag_right = True
+                if flag_left and flag_right:
+                    print("[FAILED} Test %d: Wrong TSP considering both directions of DFS traversal" % ind)
                     Tflag = True
+                if (flag_left or flag_right) and not Tflag:
+                    print("Test %d still passed." % ind)
             if ind == 8:
                 ans = 79526.611536
+                ans2 = 78992.875888
                 if (w < ans - tol) or (w > ans + tol):
-                    print('Test %d: Wrong TSP!' % ind)
-                    # Begin debugging code
-                    print(w)
-                    # End debugging code
+                    print('Test %d: Wrong TSP (when traversing the tree via DFS from left to right)!' % ind)
+                    flag_left = True
+                if (w < ans2 - tol) or (w > ans2 + tol):
+                    print('Test %d: Wrong TSP (when traversing the tree via DFS from right to left)!' % ind)
+                    flag_right = True
+                if flag_left and flag_right:
+                    print("[FAILED} Test %d: Wrong TSP considering both directions of DFS traversal" % ind)
                     Tflag = True
+                if (flag_left or flag_right) and not Tflag:
+                    print("Test %d still passed." % ind)
         else:
             Tflag = True
         if not Mflag:
@@ -815,7 +789,7 @@ s: a string indicating number of tests passed.
 """
 def test2approx():
     passed = 0
-    t = 5
+    t = 4
     tol = 1e-6
 
     # Check if the approximate solution is a 2-approximation.
